@@ -45,8 +45,7 @@ DEFAULT_REQUEST_HEADERS = {
     'Accept-Language':'zh-CN,zh;q=0.9',
     'Cache-Control': 'max-age=0',
     'Connection': 'keep-alive',
-    'Host': 'store.nintendo.com.hk',
-    'Referer': 'www.baidu.com',
+    'Referer': 'www.google.com',
     'Upgrade-Insecure-Requests':' 1',
     'User-Agent': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)',
 }

@@ -14,3 +14,11 @@ class NshkItem(scrapy.Item):
     name = scrapy.Field()
     pubdate = scrapy.Field()
     price = scrapy.Field()
+
+class NSSaleItem(scrapy.Item):
+    name = scrapy.Field()
+    originalPrice = scrapy.Field()
+    rate = scrapy.Field()
+    finalPrice = scrapy.Field()
+    endDate = scrapy.Field()
+    language = scrapy.Field()

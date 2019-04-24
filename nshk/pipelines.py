@@ -19,7 +19,12 @@ class NshkPipeline(object):
         return pipeline
 
     def spider_opened(self, spider):
-        filename = 'outputs/NSHKESHOP.json'
+        if spider.name == 'nsjpsalespider':
+            filename = 'outputs/NSJPSALE.json'
+        elif spider.name == 'nshkspider':
+            filename = 'outputs/NSHKESHOP.json'
+        else:
+            filename = 'outputs/unknown.json'
         self.file = open(filename, 'w+b')
         self.exporter = JsonLinesItemExporter(self.file, encoding="utf-8", ensure_ascii=False)
         self.exporter.start_exporting()
