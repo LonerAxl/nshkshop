@@ -10,19 +10,19 @@ pip install scrapy
 
 pip install selenium
 
-
+-----------------------------------
 
 scrapy crawl nshkspider
 
 use this to run nshkspider, which gives all the items in store.nintendo.com.hk
 
-
+-----------------------------------
 
 scrapy crawl nsjpsalespider
 
 use this to run nsjpsalespider, which gives all on sale items in store.nintendo.co.jp
 
-
+-----------------------------------
 
 for this spider, chromedriver is necessary
 
