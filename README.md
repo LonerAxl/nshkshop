@@ -24,7 +24,7 @@ use this to run nsjpsalespider, which gives all on sale items in store.nintendo.
 
 -----------------------------------
 
-for this spider, chromedriver is necessary
+for second spider, chromedriver is necessary
 
 https://sites.google.com/a/chromium.org/chromedriver/downloads
 
@@ -32,9 +32,7 @@ unzip and put the executable in a dedicated folder and add this folder to the en
 
 or just put it in a folder which is in PATH
 
-and this one is still slightly buggy
-
-will fix later
+and may add proxies usage later 
 
 and will rewrite README.md later (after I learn how to format this :)
 
