@@ -10,6 +10,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from urllib3.exceptions import MaxRetryError
+from urllib3.exceptions import NewConnectionError
+from selenium.common.exceptions import NoSuchElementException
+
 import time
 import math
 
@@ -40,25 +44,59 @@ class NSJPsalespider(scrapy.Spider):
     name = 'nsjpsalespider'
     allowed_domains = ['store.nintendo.co.jp']
     start_urls = ['https://store.nintendo.co.jp/dl-soft/sale.html?page=1']
+    #start_urls = ['https://ec.nintendo.com/JP/ja/titles/70010000005323']
+    prefs = {
+        'profile.default_content_setting_values':{
+            'images':2,
+        }
+    }
+
+    proxys = ['1.202.245.84:8080', '101.251.215.232:8081']
 
     def __init__(self):
         options = Options()
         # options.binary_location = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
         options.add_argument('--headless')
+        options.add_experimental_option('prefs', self.prefs)
         self.driver = webdriver.Chrome(chrome_options=options)
 
     def parse_detail(self, response):
+
         self.driver.get(response.url)
 
-        time.sleep(2)
+        time.sleep(3)
+
+        try:
+            self.driver.find_element_by_css_selector('button.o_c-button-border.o_c-button-size--slim')
+            button = self.driver.find_element_by_css_selector('button.o_c-button-fill.o_c-button-size--slim')
+            actions = ActionChains(self.driver)
+            actions.click(button).perform()
+            time.sleep(3)
+        except NoSuchElementException:
+            pass
+
         source = re.sub(">\s*<", "><", self.driver.page_source)
         selector = Selector(text=source)
         item = items.NSSaleItem()
 
         item['name'] = selector.css('div.o_c-page-title>h1::text').extract_first()
-        item['originalPrice'] = selector.css('div.o_p-product-detail__fixed-price::text').extract_first()
-        item['rate'] = selector.css('div.o_c-tag.o_p-product-detail__label-view::text').extract_first()
-        item['finalPrice'] = selector.css('div.o_p-product-detail__price--price::text').extract_first()
+        oP = selector.css('div.o_p-product-detail__fixed-price::text').extract_first()
+        if oP is None or oP == "":
+            item['originalPrice'] = selector.css('span.o_p-aoc-detail__fixed-price::text').extract_first()
+        else:
+            item['originalPrice'] = oP
+
+        rate = selector.css('div.o_c-tag.o_p-product-detail__label-view::text').extract_first()
+        if rate is None or rate == "":
+            item['rate'] = selector.css('div.o_c-tag.o_p-aoc-detail__label-view>span::text').extract_first()
+        else:
+            item['rate'] = rate
+
+        fP = selector.css('div.o_p-product-detail__price--price::text').extract_first()
+        if fP is None or fP == "":
+            item['finalPrice'] = selector.css('div.o_p-aoc-detail__price--price::text').extract_first()
+        else:
+            item['finalPrice'] = fP
         enddate = selector.css('div.o_c-accordion__text.o_p-product-detail-accordion__content>ul>li::text').extract_first()
         item['endDate'] = enddate.split(' ')[0]+enddate.split(' ')[1]
         column = selector.css('div.o_c-2col-list-border__row').extract()[-2]
@@ -113,14 +151,16 @@ class NSJPsalespider(scrapy.Spider):
             url = selector.css('item-card::attr(url)').extract_first()
             url_list.append(url)
 
-        for i in url_list:
-            if url_list.index(i)%50==0:
+        for i in range(190,len(url_list)):
+            if i%50==0:
                 self.driver.quit()
                 self.driver = None
                 options = Options()
+
                 options.add_argument('--headless')
+                options.add_experimental_option('prefs', self.prefs)
                 self.driver = webdriver.Chrome(chrome_options=options)
-            yield scrapy.Request(url=i, callback=self.parse_detail, dont_filter=True)
+            yield scrapy.Request(url=url_list[i], callback=self.parse_detail, dont_filter=True)
             time.sleep(2)
 
         self.driver.quit()
